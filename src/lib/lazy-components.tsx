@@ -1,8 +1,9 @@
 import dynamic from 'next/dynamic';
+import { ComponentType } from 'react';
 
 // Lazy load heavy chart components
 export const InteractiveCharts = dynamic(
-  () => import('@/components/ui/interactive-charts'),
+  () => import('@/components/ui/interactive-charts').then(mod => mod.InteractiveChart as ComponentType<any>),
   { 
     loading: () => <div className="flex items-center justify-center p-8">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -14,7 +15,7 @@ export const InteractiveCharts = dynamic(
 
 // Lazy load barcode scanner (heavy QR code libraries)
 export const BarcodeScanner = dynamic(
-  () => import('@/components/ui/barcode-scanner'),
+  () => import('@/components/ui/barcode-scanner').then(mod => mod.BarcodeScanner as ComponentType<any>),
   { 
     loading: () => <div className="flex items-center justify-center p-8">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -26,7 +27,7 @@ export const BarcodeScanner = dynamic(
 
 // Lazy load chat widget (AI SDKs)
 export const ChatWidget = dynamic(
-  () => import('@/components/ui/chat-widget'),
+  () => import('@/components/ui/chat-widget').then(mod => mod.ChatWidget as ComponentType<any>),
   { 
     loading: () => <div className="flex items-center justify-center p-8">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -38,7 +39,7 @@ export const ChatWidget = dynamic(
 
 // Lazy load activity feed
 export const ActivityFeed = dynamic(
-  () => import('@/components/ui/activity-feed'),
+  () => import('@/components/ui/activity-feed').then(mod => mod.ActivityFeed as ComponentType<any>),
   { 
     loading: () => <div className="flex items-center justify-center p-4">
       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
@@ -50,7 +51,7 @@ export const ActivityFeed = dynamic(
 
 // Lazy load advanced search
 export const AdvancedSearch = dynamic(
-  () => import('@/components/ui/advanced-search'),
+  () => import('@/components/ui/advanced-search').then(mod => mod.AdvancedSearch as ComponentType<any>),
   { 
     loading: () => <div className="flex items-center justify-center p-4">
       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
@@ -62,7 +63,7 @@ export const AdvancedSearch = dynamic(
 
 // Lazy load notification center
 export const NotificationCenter = dynamic(
-  () => import('@/components/ui/notification-center'),
+  () => import('@/components/ui/notification-center').then(mod => mod.NotificationCenter as ComponentType<any>),
   { 
     loading: () => <div className="flex items-center justify-center p-4">
       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
@@ -71,37 +72,3 @@ export const NotificationCenter = dynamic(
     ssr: false 
   }
 );
-
-// Preload function for critical components
-export const preloadCriticalComponents = () => {
-  // Preload charts when user is likely to need them
-  InteractiveCharts.preload?.();
-  
-  // Preload scanner when on products page
-  if (typeof window !== 'undefined' && window.location.pathname.includes('/products')) {
-    BarcodeScanner.preload?.();
-  }
-  
-  // Preload chat for authenticated users
-  if (typeof window !== 'undefined' && document.cookie.includes('auth')) {
-    ChatWidget.preload?.();
-  }
-};
-
-// Route-based preloading
-export const routeBasedPreload = (route: string) => {
-  switch (route) {
-    case '/dashboard':
-      InteractiveCharts.preload?.();
-      ActivityFeed.preload?.();
-      break;
-    case '/dashboard/products':
-      BarcodeScanner.preload?.();
-      break;
-    case '/dashboard/reports':
-      InteractiveCharts.preload?.();
-      break;
-    default:
-      break;
-  }
-};
