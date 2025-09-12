@@ -43,7 +43,7 @@ export const useIntersectionObserver = (
 
     observer.observe(element)
     return () => observer.disconnect()
-  }, [callback])
+  }, [callback, elementRef, options])
 }
 
 // Bundle size analyzer (development only)

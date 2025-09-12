@@ -57,11 +57,6 @@ export default function ReportsPage() {
     return typeof window !== 'undefined' && localStorage.getItem('demo_mode') === 'true'
   }, [])
 
-  useEffect(() => {
-    setIsDemoMode(demoMode)
-    loadReportData()
-  }, [dateRange, demoMode])
-
   const loadReportData = useCallback(async () => {
     try {
       if (demoMode) {
@@ -130,6 +125,11 @@ export default function ReportsPage() {
       setLoading(false)
     }
   }, [demoMode, dateRange])
+
+  useEffect(() => {
+    setIsDemoMode(demoMode)
+    loadReportData()
+  }, [dateRange, demoMode, loadReportData])
 
   const processReportData = (sales: any[], products: any[]): ReportData => {
     // Sales Report

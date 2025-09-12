@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import { Camera, X, Flashlight, FlashlightOff } from 'lucide-react'
 
@@ -21,49 +21,7 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
   const codeReader = useRef<BrowserMultiFormatReader | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  useEffect(() => {
-    if (isOpen) {
-      initializeScanner()
-    } else {
-      stopScanner()
-    }
-
-    return () => {
-      stopScanner()
-    }
-  }, [isOpen])
-
-  const initializeScanner = async () => {
-    try {
-      setError(null)
-      
-      // Initialize the code reader
-      codeReader.current = new BrowserMultiFormatReader()
-      
-      // Get available video input devices
-      const videoInputDevices = await BrowserMultiFormatReader.listVideoInputDevices()
-      setDevices(videoInputDevices)
-      
-      if (videoInputDevices.length === 0) {
-        setError('No camera devices found')
-        return
-      }
-
-      // Select the back camera if available, otherwise use the first device
-      const backCamera = videoInputDevices.find(device => 
-        device.label.toLowerCase().includes('back') || 
-        device.label.toLowerCase().includes('rear')
-      ) || videoInputDevices[0]
-
-      setCurrentDeviceId(backCamera.deviceId)
-      await startScanning(backCamera.deviceId)
-    } catch (err: any) {
-      console.error('Error initializing scanner:', err)
-      setError(`Camera access denied: ${err.message}`)
-    }
-  }
-
-  const startScanning = async (deviceId?: string) => {
+  const startScanning = useCallback(async (deviceId?: string) => {
     if (!codeReader.current || !videoRef.current) return
 
     try {
@@ -107,7 +65,49 @@ export function BarcodeScanner({ onScan, onClose, isOpen }: BarcodeScannerProps)
     } finally {
       setIsScanning(false)
     }
-  }
+  }, [codeReader, currentDeviceId, onScan, onClose, videoRef])
+
+  const initializeScanner = useCallback(async () => {
+    try {
+      setError(null)
+      
+      // Initialize the code reader
+      codeReader.current = new BrowserMultiFormatReader()
+      
+      // Get available video input devices
+      const videoInputDevices = await BrowserMultiFormatReader.listVideoInputDevices()
+      setDevices(videoInputDevices)
+      
+      if (videoInputDevices.length === 0) {
+        setError('No camera devices found')
+        return
+      }
+
+      // Select the back camera if available, otherwise use the first device
+      const backCamera = videoInputDevices.find(device => 
+        device.label.toLowerCase().includes('back') || 
+        device.label.toLowerCase().includes('rear')
+      ) || videoInputDevices[0]
+
+      setCurrentDeviceId(backCamera.deviceId)
+      await startScanning(backCamera.deviceId)
+    } catch (err: any) {
+      console.error('Error initializing scanner:', err)
+      setError(`Camera access denied: ${err.message}`)
+    }
+  }, [startScanning])
+
+  useEffect(() => {
+    if (isOpen) {
+      initializeScanner()
+    } else {
+      stopScanner()
+    }
+
+    return () => {
+      stopScanner()
+    }
+  }, [isOpen, initializeScanner])
 
   const stopScanner = () => {
     // Clean up video stream

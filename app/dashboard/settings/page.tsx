@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { 
   Save, 
@@ -49,12 +49,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('business')
   const [isDemoMode, setIsDemoMode] = useState(false)
 
-  useEffect(() => {
-    setIsDemoMode(localStorage.getItem('demo_mode') === 'true')
-    loadSettings()
-  }, [])
-
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     try {
       if (isDemoMode || localStorage.getItem('demo_mode') === 'true') {
         setBusinessSettings({
@@ -115,7 +110,12 @@ export default function SettingsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [isDemoMode])
+
+  useEffect(() => {
+    setIsDemoMode(localStorage.getItem('demo_mode') === 'true')
+    loadSettings()
+  }, [loadSettings])
 
   const saveBusinessSettings = async () => {
     if (isDemoMode || localStorage.getItem('demo_mode') === 'true') {

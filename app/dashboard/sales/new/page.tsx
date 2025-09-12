@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils'
@@ -55,12 +55,7 @@ export default function NewSalePage() {
   const [saving, setSaving] = useState(false)
   const [isDemoMode, setIsDemoMode] = useState(false)
 
-  useEffect(() => {
-    setIsDemoMode(localStorage.getItem('demo_mode') === 'true')
-    loadProducts()
-  }, [])
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       if (isDemoMode || localStorage.getItem('demo_mode') === 'true') {
         setProducts(getDemoProducts())
@@ -94,7 +89,12 @@ export default function NewSalePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [isDemoMode])
+
+  useEffect(() => {
+    setIsDemoMode(localStorage.getItem('demo_mode') === 'true')
+    loadProducts()
+  }, [loadProducts])
 
   const getDemoProducts = (): Product[] => [
     {

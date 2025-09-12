@@ -65,11 +65,6 @@ export default function SalesPage() {
     return typeof window !== 'undefined' && localStorage.getItem('demo_mode') === 'true'
   }, [])
 
-  useEffect(() => {
-    setIsDemoMode(demoMode)
-    loadSales()
-  }, [dateRange, demoMode])
-
   const loadSales = useCallback(async () => {
     try {
       if (demoMode) {
@@ -131,6 +126,11 @@ export default function SalesPage() {
       setLoading(false)
     }
   }, [demoMode, dateRange])
+
+  useEffect(() => {
+    setIsDemoMode(demoMode)
+    loadSales()
+  }, [dateRange, demoMode, loadSales])
 
   const getDemoSales = (): Sale[] => [
     {

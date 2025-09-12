@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { ArrowLeft, Save, Package, Scan } from 'lucide-react'
@@ -55,17 +55,7 @@ export default function ProductFormPage() {
     low_stock_threshold: 10
   })
 
-  useEffect(() => {
-    setIsDemoMode(localStorage.getItem('demo_mode') === 'true')
-    
-    if (isEdit) {
-      loadProduct()
-    } else {
-      generateSKU()
-    }
-  }, [isEdit])
-
-  const loadProduct = async () => {
+  const loadProduct = useCallback(async () => {
     if (isDemoMode || localStorage.getItem('demo_mode') === 'true') {
       // Load demo data for editing
       setFormData({
@@ -79,6 +69,12 @@ export default function ProductFormPage() {
         supplier: 'Demo Supplier',
         low_stock_threshold: 10
       })
+      return
+    }
+
+    // Add null check for params
+    if (!params || !params.id) {
+      router.push('/dashboard/products')
       return
     }
 
@@ -113,7 +109,17 @@ export default function ProductFormPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [isDemoMode, params, router])
+
+  useEffect(() => {
+    setIsDemoMode(localStorage.getItem('demo_mode') === 'true')
+    
+    if (isEdit) {
+      loadProduct()
+    } else {
+      generateSKU()
+    }
+  }, [isEdit, loadProduct])
 
   const generateSKU = () => {
     const timestamp = Date.now().toString().slice(-6)
@@ -171,6 +177,12 @@ export default function ProductFormPage() {
     }
 
     if (!validateForm()) return
+
+    // Add null check for params
+    if (isEdit && (!params || !params.id)) {
+      alert('Invalid product ID')
+      return
+    }
 
     setSaving(true)
     try {
