@@ -170,7 +170,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, user, isDemoMode 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-4 space-y-1">
             {navigationItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+              const isActive = pathname && (pathname === item.href || pathname.startsWith(item.href + '/'))
               return (
                 <Link
                   key={item.name}
